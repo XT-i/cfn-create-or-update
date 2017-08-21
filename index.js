@@ -2,6 +2,7 @@
 
 const assert = require('assert-plus');
 const AWS = require('aws-sdk');
+const proxy = require('proxy-agent');
 
 function checkStack(cfn, args, cb) {
   cfn.describeStacks({
@@ -184,6 +185,11 @@ function createCfnClient(region, profile) {
   }
   if (region !== undefined) {
     cfnOptions.region = region;
+  }
+  if (process.env.HTTPS_PROXY !== undefined) {
+      AWS.config.update({
+          httpOptions: { agent: proxy(process.env.HTTPS_PROXY) }
+      });
   }
   return new AWS.CloudFormation(cfnOptions);
 }
